@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width, shrink-to-fit=no">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <title>Online Exhibition</title>
+  <script src="js/three.min.js"></script>
+  <script src="js/panolens.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Open Sans', sans-serif;
+      background-color: #000;
+    }
+
+    .loader {
+      position: fixed;
+      z-index: 99;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgb(0, 0, 0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loader.hidden {
+      animation: fadeOut 2s;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fadeOut {
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    #drawer-container {
+      position: fixed;
+      width: 100%;
+      bottom: 0px;
+      left: 0.5%;
+      right: 0.5%;
+      margin: 0;
+      padding: 0;
+
+    }
+
+    #drawer {
+      white-space: nowrap;
+    }
+
+    /* #desc-container {
+            position: fixed;
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(182, 31, 31, 0);
+            color: rgb(90, 199, 199);
+            border-radius: 3px;
+            -webkit-overflow-scrolling: touch;
+        }
+    #image{
+      padding-left: 500px;
+      background:rgba(255, 255, 0, 0);
+    } */
+    /* .img-container {
+      border: solid red 1px;
+      display: block;
+    }
+
+    .img-container button {
+      position: absolute;
+      top: 50px;
+      left: 50px;
+    } */
+    #plan {
+      width: 100%;
+      background: rgba(255, 255, 255, 0);
+      color: #000;
+      border-radius: 3px;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #plan button {
+      position: absolute;
+      top: 50px;
+      left: 50px;
+    }
+    #desc-container3,
+    #desc-container4,
+    #desc-container5,
+    #desc-container6,
+    #desc-container7,
+    #desc-container8 {
+      position: fixed;
+      width: 100%;
+      max-width: 700px;
+      background: rgb(255, 255, 255);
+      color: #000;
+      border: 2px solid rgb(0, 0, 0);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .photo {
+      width: 9%;
+      height: 150px;
+      margin: 0%;
+
+      background-color: black;
+      display: inline-block;
+      transform: rotateZ(0deg);
+      transition: all 0.4s ease;
+      opacity: 0.75;
+      background-position: center;
+      background-size: cover;
+      cursor: pointer;
+      border: 2px solid white;
+    }
+
+    .photo:hover {
+      transform: rotateZ(0deg) translateY(-50px);
+      /* -webkit-filter: grayscale(0.0); */
+      opacity: 1;
+    }
+
+    #control {
+      position: fixed;
+    }
+
+    .btn {
+      background-color: rgb(255, 255, 255);
+      /* Blue background */
+      border: 2px solid rgb(97, 97, 97);
+      /* Remove borders */
+      color: rgb(0, 0, 0);
+      /* White text */
+      padding: 1px 5px;
+      /* Some padding */
+      font-size: 24px;
+      /* Set a font size */
+      cursor: pointer;
+      /* Mouse pointer on hover */
+    }
+
+    /* Darker background on mouse-over */
+    .btn:hover {
+      background-color: rgb(145, 145, 145);
+    }
+  </style>
+</head>
+
+<body>
+
+
+
+  <div id="control">
+    <br>
+    <button onclick="tomap()" class="btn"><i class="fa fa-map-o"></i> TOURIST MAP 全區導覽 </button>
+    <br>
+    <button onclick="topanorama()" class="btn"><i class="fa fa-street-view"></i> DETAILS PANORAMA 細部全景圖 </button>
+    <br>
+    <br>
+    <div id="zoom" style="display:block">
+      <button onclick="zoomin()" class="btn"><i class="fa fa-plus-square-o"></i></button>
+      <br>
+      <button onclick="zoomout()" class="btn"><i class="fa fa-minus-square-o"></i></button>
+    </div>
+  </div>
+
+  <div class="loader">
+    <img src="photo/Loading.gif" alt="Loading..." />
+  </div>
+
+  <div id="plan" style="display:none;">
+    <img src="https://live.staticflickr.com/65535/51075228083_3bfc48d2e3_k.jpg" width="100%"> </img>
+  </div>
+
+
+
+  <div id="drawer-container">
+    <div id="drawer"></div>
+  </div>
+
+  <div id="desc-container3" style="display:none">
+    <img src="https://farm66.static.flickr.com/65535/51068357682_9be4ebbba0_o.png" width="100%"> </img>
+  </div>
+  <div id="desc-container4" style="display:none">
+    <img src="https://farm66.static.flickr.com/65535/51068265541_ec2de52b0e_o.png" width="100%"> </img>
+  </div>
+  <div id="desc-container5" style="display:none">
+    <img src="https://farm66.static.flickr.com/65535/51068357742_e808c03705_o.png" width="100%"> </img>
+  </div>
+  <div id="desc-container6" style="display:none">
+    <img src="https://farm66.static.flickr.com/65535/50999081050_0cc70b6b88_o.png" width="100%"> </img>
+  </div>
+  <div id="desc-container7" style="display:none">
+    <img src="https://farm66.static.flickr.com/65535/51067561243_9bb190737d_o.png" width="100%"> </img>
+  </div>
+  <div id="desc-container8" style="display:none">
+    <img src="https://farm66.static.flickr.com/65535/51068265671_c6e7b90f7c_o.png" width="100%"> </img>
+  </div>
+
+
+
+
+  <script>
+
+    var viewer, lists, sceenshots, drawerElement, panorama, lookAtPositions, infospotPositions0, plan, arrowurl;
+    var count = 0;
+    var fov;
+    var fovnew;
+    // plan = PANOLENS.ImageLoader.load("https://farm66.static.flickr.com/65535/51075211967_f0208bb1b5_o.jpg")
+    arrowurl = "https://img.icons8.com/material/000000/200/slide-up";
+    "https://img.icons8.com/material/000000/150/info.png"
+
+
+    lookAtPositions = [
+      new THREE.Vector3(500, -100, 0),
+      new THREE.Vector3(500, -50, 50),
+    ];
+    drawerElement = document.querySelector('#drawer');
+
+    sceenshots = [
+      "1", 'https://farm66.static.flickr.com/65535/50999082595_1e9b3705aa_o.png',
+      "2", 'https://farm66.static.flickr.com/65535/50999082545_749d8ac13c_o.png',
+      "3", 'https://farm66.static.flickr.com/65535/51068267171_ab50c11a51_o.png',
+      "4", 'https://farm66.static.flickr.com/65535/50999082475_1dc44e8e27_o.png',
+      "5", 'https://farm66.static.flickr.com/65535/51067562653_1604876573_o.png',
+      "6", 'https://farm66.static.flickr.com/65535/51068359237_27265d3fb6_o.png',
+      "7", 'https://farm66.static.flickr.com/65535/51068267066_ba35428d08_o.png',
+      "8", 'https://farm66.static.flickr.com/65535/51067562603_4799e0e685_o.png',
+      "9", 'https://farm66.static.flickr.com/65535/51067562573_d50505f6fb_o.png',
+      "10", 'https://farm66.static.flickr.com/65535/51067562533_1e1586c59b_o.png',
+      "11", 'https://farm66.static.flickr.com/65535/51067562503_a7597a908c_o.png',
+    ];
+
+    lists = [
+      "1", "https://farm66.static.flickr.com/65535/51068262231_96176912fd_o.jpg",
+      "2", "https://farm66.static.flickr.com/65535/50999077745_19eefb6ce1_o.jpg",
+      "3", "https://farm66.static.flickr.com/65535/51068354117_17268d0053_o.jpg",
+      "4", "https://farm66.static.flickr.com/65535/50999077540_2064ba1308_o.jpg",
+      "5", "https://farm66.static.flickr.com/65535/51068353912_be793ddefa_o.jpg",
+      "6", "https://farm66.static.flickr.com/65535/51067557268_744f725062_o.jpg",
+      "7", "https://farm66.static.flickr.com/65535/50999077300_efc7dfaecc_o.jpg",
+      "8", "https://farm66.static.flickr.com/65535/51068353697_83954dc870_o.jpg",
+      "9", "https://farm66.static.flickr.com/65535/51068353572_459f061d76_o.jpg",
+      "10", "https://farm66.static.flickr.com/65535/50999077060_5e2e23480a_o.jpg",
+      "11", "https://farm66.static.flickr.com/65535/51068353352_b12c319d66_o.jpg",
+
+    ];
+
+    infospotPositions0 = [
+      new THREE.Vector3(4000, -800, -20),
+
+      new THREE.Vector3(-2000, -1000, -20),
+      new THREE.Vector3(3000, -1000, -2500),
+      new THREE.Vector3(3000, -1000, 2500),
+
+      new THREE.Vector3(1800, -2500, 3600),
+      new THREE.Vector3(3000, -850, -2450),
+      new THREE.Vector3(3000, -550, 1900),
+
+      new THREE.Vector3(3000, -700, 2400),
+      new THREE.Vector3(3000, -700, -2100),
+
+      new THREE.Vector3(3000, -800, 2800),
+      new THREE.Vector3(3000, -600, -2100),
+      new THREE.Vector3(-1000, -1200, -2600),
+
+      new THREE.Vector3(3000, -680, 2200),
+      new THREE.Vector3(3000, -750, -1700),
+      new THREE.Vector3(-800, -1300, 3400),
+
+      new THREE.Vector3(3000, -950, 3200),
+      new THREE.Vector3(3000, -850, -2300),
+
+      new THREE.Vector3(1000, -1700, -2400),
+      new THREE.Vector3(3000, -650, -1700),
+      new THREE.Vector3(3000, -900, 2300),
+
+      new THREE.Vector3(3000, -1700, 3000),
+      new THREE.Vector3(3000, -1400, 6000),
+
+      new THREE.Vector3(3000, -400, 580),
+      new THREE.Vector3(3000, -400, -820),
+      new THREE.Vector3(-1000, -3000, -8000),
+      new THREE.Vector3(-1000, -3000, 8000),
+
+      new THREE.Vector3(3000, -1400, -6000),
+      new THREE.Vector3(3000, -1600, -3200),
+
+
+    ];
+
+
+    infospot3 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/150/info.png");
+    infospot3.position.set(5000, -1900, 200);
+    infospot4 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/151/info.png");
+    infospot4.position.set(5000, -1800, 200);
+    infospot5 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/149/info.png");
+    infospot5.position.set(5000, -2200, 200);
+    infospot6 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/152/info.png");
+    infospot6.position.set(5000, -2200, 700);
+    infospot7 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/153/info.png");
+    infospot7.position.set(5000, -1900, 500);
+    infospot8 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/154/info.png");
+    infospot8.position.set(5000, -2500, 200);
+
+    // infospot = new PANOLENS.Infospot(300,"https://img.icons8.com/ios/000000/151/info.png");
+    // infospot.position.set(5000, -1900, 200);
+    // infospot.addHoverText('Online Coffee exhibition');
+
+    // infospot2.addEventListener('click', function () {
+    //   document.getElementById('desc-container').style.display = "block"
+    // });
+
+
+
+    panorama1 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068262231_96176912fd_o.jpg');
+    panorama2 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/50999077745_19eefb6ce1_o.jpg');
+    panorama3 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068354117_17268d0053_o.jpg');
+    panorama4 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/50999077540_2064ba1308_o.jpg');
+    panorama5 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068353912_be793ddefa_o.jpg');
+    panorama6 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51067557268_744f725062_o.jpg');
+    panorama7 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/50999077300_efc7dfaecc_o.jpg');
+    panorama8 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068353697_83954dc870_o.jpg');
+    panorama9 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068353572_459f061d76_o.jpg');
+    panorama10 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/50999077060_5e2e23480a_o.jpg');
+    panorama11 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068353352_b12c319d66_o.jpg');
+
+
+    panorama1.addEventListener('enter-fade-start', function () {
+      viewer.tweenControlCenter(lookAtPositions[0], 0);
+      viewer.setCameraFov(100);
+      fov = 100;
+      // viewer.setPanorama(panorama1);
+      // viewer.add(panorama1);
+    });
+    panorama2.addEventListener('enter-fade-start', function () {
+      infospot3.removeHoverElement();
+      infospot8.removeHoverElement();
+      viewer.tweenControlCenter(lookAtPositions[0], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+
+    panorama3.addEventListener('enter-fade-start', function () {
+      infospot4.removeHoverElement();
+      infospot8.removeHoverElement();
+
+      infospot3.addHoverElement(document.getElementById('desc-container3'), 230);
+      panorama3.add(infospot3)
+      viewer.tweenControlCenter(lookAtPositions[1], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+
+    panorama4.addEventListener('enter-fade-start', function () {
+      infospot3.removeHoverElement();
+      infospot5.removeHoverElement();
+
+      infospot4.addHoverElement(document.getElementById('desc-container4'), 230);
+      panorama4.add(infospot4)
+      viewer.tweenControlCenter(lookAtPositions[1], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama5.addEventListener('enter-fade-start', function () {
+      infospot4.removeHoverElement();
+      infospot6.removeHoverElement();
+
+      infospot5.addHoverElement(document.getElementById('desc-container5'), 230);
+      panorama5.add(infospot5)
+      viewer.tweenControlCenter(lookAtPositions[1], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama6.addEventListener('enter-fade-start', function () {
+      infospot5.removeHoverElement();
+      infospot7.removeHoverElement();
+
+      infospot6.addHoverElement(document.getElementById('desc-container6'), 280);
+      panorama6.add(infospot6)
+      viewer.tweenControlCenter(lookAtPositions[1], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama7.addEventListener('enter-fade-start', function () {
+      infospot6.removeHoverElement();
+      infospot8.removeHoverElement();
+
+      infospot7.addHoverElement(document.getElementById('desc-container7'), 230);
+      panorama7.add(infospot7)
+      viewer.tweenControlCenter(lookAtPositions[1], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama8.addEventListener('enter-fade-start', function () {
+      infospot7.removeHoverElement();
+      infospot3.removeHoverElement();
+
+      infospot8.addHoverElement(document.getElementById('desc-container8'), 230);
+      panorama8.add(infospot8)
+      viewer.tweenControlCenter(lookAtPositions[1], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama9.addEventListener('enter-fade-start', function () {
+      viewer.tweenControlCenter(lookAtPositions[0], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama10.addEventListener('enter-fade-start', function () {
+      viewer.tweenControlCenter(lookAtPositions[0], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+    panorama11.addEventListener('enter-fade-start', function () {
+      viewer.tweenControlCenter(lookAtPositions[0], 0);
+      viewer.setCameraFov(90);
+      fov = 90;
+    });
+
+
+    panorama1.link(panorama2, infospotPositions0[0], 500, arrowurl);
+
+
+    panorama2.link(panorama1, infospotPositions0[1], 300, arrowurl);
+    panorama2.link(panorama1, infospotPositions0[1], 300, arrowurl);
+    panorama2.link(panorama3, infospotPositions0[2], 300, arrowurl);
+    panorama2.link(panorama8, infospotPositions0[3], 300, arrowurl);
+
+
+    panorama3.link(panorama2, infospotPositions0[4], 400, arrowurl);
+    panorama3.link(panorama4, infospotPositions0[5], 300, arrowurl);
+    panorama3.link(panorama8, infospotPositions0[6], 250, arrowurl);
+
+    // panorama4.add(infospot4);
+    panorama4.link(panorama3, infospotPositions0[7], 300, arrowurl);
+    panorama4.link(panorama5, infospotPositions0[8], 300, arrowurl);
+
+
+    panorama5.link(panorama4, infospotPositions0[9], 300, arrowurl);
+    panorama5.link(panorama6, infospotPositions0[10], 300, arrowurl);
+    panorama5.link(panorama10, infospotPositions0[11], 300, arrowurl);
+
+    panorama6.link(panorama5, infospotPositions0[12], 250, arrowurl);
+    panorama6.link(panorama7, infospotPositions0[13], 300, arrowurl);
+    panorama6.link(panorama10, infospotPositions0[14], 300, arrowurl);
+
+    panorama7.link(panorama6, infospotPositions0[15], 300, arrowurl);
+    panorama7.link(panorama8, infospotPositions0[16], 300, arrowurl);
+
+    panorama8.link(panorama2, infospotPositions0[17], 250, arrowurl);
+    panorama8.link(panorama3, infospotPositions0[18], 300, arrowurl);
+    panorama8.link(panorama7, infospotPositions0[19], 300, arrowurl);
+
+    panorama9.link(panorama10, infospotPositions0[20], 300, arrowurl);
+    panorama9.link(panorama11, infospotPositions0[21], 300, arrowurl);
+
+    panorama10.link(panorama5, infospotPositions0[22], 200, arrowurl);
+    panorama10.link(panorama6, infospotPositions0[23], 200, arrowurl);
+    panorama10.link(panorama9, infospotPositions0[24], 600, arrowurl);
+    panorama10.link(panorama11, infospotPositions0[25], 600, arrowurl);
+
+    panorama11.link(panorama9, infospotPositions0[26], 300, arrowurl);
+    panorama11.link(panorama10, infospotPositions0[27], 300, arrowurl);
+
+
+
+    for (var i = 0; i < sceenshots.length / 2; i++) {
+      var url = sceenshots[2 * i + 1];
+      var url1 = lists[2 * i + 1];
+      var id = sceenshots[2 * i];
+      var position = lookAtPositions[i]
+
+      var photo = document.createElement('div');
+      photo.classList.add('photo');
+      photo.style.backgroundImage = 'url(' + url + ')';
+
+      photo.url = url1;
+      photo.type = 'image';
+      photo.id = id
+
+      // panorama = new PANOLENS.ImagePanorama("https://farm66.static.flickr.com/65535/51068262231_96176912fd_o.jpg");
+      // panorama.link( panorama2, infospotPositions0[0],300,arrowurl );
+      // panorama.link( panorama3, infospotPositions0[1],300,arrowurl );
+      // panorama.link( panorama8, infospotPositions0[2],300,arrowurl );
+      // panorama.addEventListener('enter-fade-start', function () {
+      //   viewer.tweenControlCenter(lookAtPositions[0], 0);
+      //   viewer.setCameraFov(90)
+      //   viewer.setPanorama(panorama);
+      //   viewer.add(panorama);
+      // });
+
+      photo.addEventListener('click', function () {
+
+
+
+        fov = 90;
+        // panorama = new PANOLENS.ImagePanorama(this.url);
+        // panorama.addEventListener('enter-fade-start', function () {
+        //   viewer.tweenControlCenter(lookAtPositions[0], 0);
+        //   viewer.setCameraFov(90)
+        // });
+
+        if (this.id === '1') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          viewer.tweenControlCenter(lookAtPositions[0], 0);
+          viewer.setCameraFov(100)
+          viewer.setPanorama(panorama1);
+          viewer.add(panorama1);
+
+        }
+
+        if (this.id === '2') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          viewer.tweenControlCenter(lookAtPositions[0], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama2);
+          viewer.add(panorama2);
+
+
+        }
+        if (this.id === '3') {
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          infospot3.addHoverElement(document.getElementById('desc-container3'), 230);
+          viewer.tweenControlCenter(lookAtPositions[1], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama3);
+          viewer.add(panorama3);
+        }
+        if (this.id === '4') {
+          infospot3.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          infospot4.addHoverElement(document.getElementById('desc-container4'), 230);
+          viewer.tweenControlCenter(lookAtPositions[1], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama4);
+          viewer.add(panorama4);
+        }
+        if (this.id === '5') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          infospot5.addHoverElement(document.getElementById('desc-container5'), 230);
+          viewer.tweenControlCenter(lookAtPositions[1], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama5);
+          viewer.add(panorama5);
+        }
+        if (this.id === '6') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          infospot6.addHoverElement(document.getElementById('desc-container6'), 280);
+          viewer.tweenControlCenter(lookAtPositions[1], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama6);
+          viewer.add(panorama6);
+        }
+        if (this.id === '7') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot8.removeHoverElement();
+          infospot7.addHoverElement(document.getElementById('desc-container7'), 230);
+          viewer.tweenControlCenter(lookAtPositions[1], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama7);
+          viewer.add(panorama7);
+        }
+        if (this.id === '8') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.addHoverElement(document.getElementById('desc-container8'), 230);
+          viewer.tweenControlCenter(lookAtPositions[1], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama8);
+          viewer.add(panorama8);
+        }
+        if (this.id === '9') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          viewer.tweenControlCenter(lookAtPositions[0], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama9);
+          viewer.add(panorama9);
+        }
+        if (this.id === '10') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          viewer.tweenControlCenter(lookAtPositions[0], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama10);
+          viewer.add(panorama10);
+        }
+        if (this.id === '11') {
+          infospot3.removeHoverElement();
+          infospot4.removeHoverElement();
+          infospot5.removeHoverElement();
+          infospot6.removeHoverElement();
+          infospot7.removeHoverElement();
+          infospot8.removeHoverElement();
+          viewer.tweenControlCenter(lookAtPositions[0], 0);
+          viewer.setCameraFov(90)
+          viewer.setPanorama(panorama11);
+          viewer.add(panorama11);
+        }
+
+      });
+
+      drawerElement.appendChild(photo);
+    }
+    viewer = new PANOLENS.Viewer({ controlBar: false });
+    viewer.add(panorama1, panorama2, panorama3, panorama4, panorama5, panorama6, panorama7, panorama8, panorama9, panorama10, panorama11);
+
+    function zoomin() {
+      count++;
+      fovnew = fov - 10 * count
+      viewer.setCameraFov(fovnew)
+      count = 0;
+      fov = fovnew
+    }
+    function zoomout() {
+      count--;
+      fovnew = fov - 10 * count
+      viewer.setCameraFov(fovnew)
+      count = 0;
+      fov = fovnew
+    }
+
+    function topanorama() {
+      document.getElementById('plan').style.display = "none"
+      document.getElementById('zoom').style.display = "inline-block"
+    }
+    function tomap() {
+      document.getElementById('plan').style.display = "inline-block"
+      document.getElementById('zoom').style.display = "none"
+    }
+
+    window.addEventListener("load", function () {
+      var loader = document.querySelector(".loader");
+      loader.className += " hidden";
+    });
+
+  </script>
+
+</body>
+
+</html>
