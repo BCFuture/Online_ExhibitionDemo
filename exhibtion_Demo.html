@@ -67,29 +67,6 @@
       white-space: nowrap;
     }
 
-    /* #desc-container {
-            position: fixed;
-            width: 100%;
-            max-width: 1200px;
-            background: rgba(182, 31, 31, 0);
-            color: rgb(90, 199, 199);
-            border-radius: 3px;
-            -webkit-overflow-scrolling: touch;
-        }
-    #image{
-      padding-left: 500px;
-      background:rgba(255, 255, 0, 0);
-    } */
-    /* .img-container {
-      border: solid red 1px;
-      display: block;
-    }
-
-    .img-container button {
-      position: absolute;
-      top: 50px;
-      left: 50px;
-    } */
     #plan {
       width: 100%;
       background: rgba(255, 255, 255, 0);
@@ -227,7 +204,6 @@
     var count = 0;
     var fov;
     var fovnew;
-    // plan = PANOLENS.ImageLoader.load("https://farm66.static.flickr.com/65535/51075211967_f0208bb1b5_o.jpg")
     arrowurl = "https://img.icons8.com/material/000000/200/slide-up";
     "https://img.icons8.com/material/000000/150/info.png"
 
@@ -324,14 +300,6 @@
     infospot8 = new PANOLENS.Infospot(400, "https://img.icons8.com/metro/000000/154/info.png");
     infospot8.position.set(5000, -2500, 200);
 
-    // infospot = new PANOLENS.Infospot(300,"https://img.icons8.com/ios/000000/151/info.png");
-    // infospot.position.set(5000, -1900, 200);
-    // infospot.addHoverText('Online Coffee exhibition');
-
-    // infospot2.addEventListener('click', function () {
-    //   document.getElementById('desc-container').style.display = "block"
-    // });
-
 
 
     panorama1 = new PANOLENS.ImagePanorama('https://farm66.static.flickr.com/65535/51068262231_96176912fd_o.jpg');
@@ -351,8 +319,6 @@
       viewer.tweenControlCenter(lookAtPositions[0], 0);
       viewer.setCameraFov(100);
       fov = 100;
-      // viewer.setPanorama(panorama1);
-      // viewer.add(panorama1);
     });
     panorama2.addEventListener('enter-fade-start', function () {
       infospot3.removeHoverElement();
@@ -453,7 +419,6 @@
     panorama3.link(panorama4, infospotPositions0[5], 300, arrowurl);
     panorama3.link(panorama8, infospotPositions0[6], 250, arrowurl);
 
-    // panorama4.add(infospot4);
     panorama4.link(panorama3, infospotPositions0[7], 300, arrowurl);
     panorama4.link(panorama5, infospotPositions0[8], 300, arrowurl);
 
@@ -500,27 +465,10 @@
       photo.type = 'image';
       photo.id = id
 
-      // panorama = new PANOLENS.ImagePanorama("https://farm66.static.flickr.com/65535/51068262231_96176912fd_o.jpg");
-      // panorama.link( panorama2, infospotPositions0[0],300,arrowurl );
-      // panorama.link( panorama3, infospotPositions0[1],300,arrowurl );
-      // panorama.link( panorama8, infospotPositions0[2],300,arrowurl );
-      // panorama.addEventListener('enter-fade-start', function () {
-      //   viewer.tweenControlCenter(lookAtPositions[0], 0);
-      //   viewer.setCameraFov(90)
-      //   viewer.setPanorama(panorama);
-      //   viewer.add(panorama);
-      // });
-
       photo.addEventListener('click', function () {
-
-
-
+        document.getElementById('plan').style.display = "none";
+        document.getElementById('zoom').style.display = "inline-block";
         fov = 90;
-        // panorama = new PANOLENS.ImagePanorama(this.url);
-        // panorama.addEventListener('enter-fade-start', function () {
-        //   viewer.tweenControlCenter(lookAtPositions[0], 0);
-        //   viewer.setCameraFov(90)
-        // });
 
         if (this.id === '1') {
           infospot3.removeHoverElement();
@@ -684,10 +632,18 @@
     function topanorama() {
       document.getElementById('plan').style.display = "none"
       document.getElementById('zoom').style.display = "inline-block"
+      viewer.setPanorama(panorama1);
+      viewer.add(panorama1);
     }
     function tomap() {
       document.getElementById('plan').style.display = "inline-block"
       document.getElementById('zoom').style.display = "none"
+      infospot3.removeHoverElement();
+      infospot4.removeHoverElement();
+      infospot5.removeHoverElement();
+      infospot6.removeHoverElement();
+      infospot7.removeHoverElement();
+      infospot8.removeHoverElement();
     }
 
     window.addEventListener("load", function () {
